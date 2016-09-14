@@ -1,3 +1,5 @@
+// https://github.com/dotandbo/Magnifier.js (forked from https://github.com/mark-rolich/Magnifier.js)
+
 /**
 * Magnifier.js is a Javascript library enabling magnifying glass effect on an images.
 *
@@ -449,18 +451,10 @@ var Magnifier = function (evt, options) {
     };
 
     this.set = function (options) {
-    /*
-      ---------------------
-      Library Modification:
-      ---------------------
-      Removed this short-circuit from Library in order to allow updating of the lens and preview images
-      when updating the current image from the product image selector
-
-      if (data[options.thumb.id] !== undefined) {
+        if (data[options.thumb.id] !== undefined) {
           curThumb = options.thumb;
           return false;
-      }
-    */
+        }
 
         var thumbObj    = new Image(),
             largeObj    = new Image(),
