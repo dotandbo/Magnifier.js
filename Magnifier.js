@@ -179,6 +179,15 @@ var Magnifier = function (evt, options) {
                 if (data[idx].mode === 'inside') {
                     lens.appendChild(large);
                 } else {
+                  /*
+                    ---------------------
+                    Library Modification:
+                    ---------------------
+                    Remove children from largeWrapper so that it gets updated with the correct new large image
+                  */
+                    while (largeWrapper.firstChild) {
+                      largeWrapper.removeChild(largeWrapper.firstChild);
+                    }
                     largeWrapper.appendChild(large);
                 }
             }
@@ -186,18 +195,28 @@ var Magnifier = function (evt, options) {
             lens.style.width = data[idx].lensW + 'px';
             lens.style.height = data[idx].lensH + 'px';
         },
-        getMousePos = function () {
+        getMousePos = function (e) {
             var xPos = pos.x - curData.x,
                 yPos = pos.y - curData.y,
                 t    = 0,
                 l    = 0;
+
+            /*
+              ---------------------
+              Library Modification:
+              ---------------------
+              Add condition to check if the target of mousemove event is on the correct thumb.
+              Solves cases where another element is overlayed on top of the thumb image and getMousePos()
+              incorrectly thinks it is inBounds.
+            */
+            var onThumbTarget = e && e.target === thumb;
 
             inBounds = (
                 xPos < 0 ||
                 yPos < 0 ||
                 xPos > curData.w ||
                 yPos > curData.h
-            )
+            ) && !onThumbTarget
                 ? false
                 : true;
 
@@ -269,7 +288,7 @@ var Magnifier = function (evt, options) {
                 curData.largeW = Math.round(curData.zoom * w);
                 curData.largeH = Math.round(curData.zoom * h);
 
-                getMousePos();
+                getMousePos(e);
                 updateLensOnZoom();
 
                 if (handler !== null) {
@@ -430,10 +449,18 @@ var Magnifier = function (evt, options) {
     };
 
     this.set = function (options) {
-        if (data[options.thumb.id] !== undefined) {
-            curThumb = options.thumb;
-            return false;
-        }
+    /*
+      ---------------------
+      Library Modification:
+      ---------------------
+      Removed this short-circuit from Library in order to allow updating of the lens and preview images
+      when updating the current image from the product image selector
+
+      if (data[options.thumb.id] !== undefined) {
+          curThumb = options.thumb;
+          return false;
+      }
+    */
 
         var thumbObj    = new Image(),
             largeObj    = new Image(),
@@ -528,7 +555,7 @@ var Magnifier = function (evt, options) {
             pos.x = e.clientX;
             pos.y = e.clientY;
 
-            getMousePos();
+            getMousePos(e);
             move();
 
             var handler = curData.onthumbenter;
@@ -569,9 +596,9 @@ var Magnifier = function (evt, options) {
         pos.x = e.clientX;
         pos.y = e.clientY;
 
-        getMousePos();
+        getMousePos(e);
 
-        if (inBounds === true) {
+        if (inBounds === true && isOverThumb) {
             move();
         } else {
             if (isOverThumb !== 0) {
